@@ -11,10 +11,21 @@ end
 
 
 task :gemspec do
+  ignore_extensions = 'git', 'svn', 'tmp', /sw./, 'bak', 'gem'
+  ignore_directories = 'pkg'
+
   shiteless = 
     lambda do |list|
-      list.delete_if{|entry| test(?f, entry) and File.basename(entry) =~ %r/\.(git|svn|tmp|sw.|bak)$/}
-      list.delete_if{|entry| test(?d, entry) and File.basename(entry) =~ %r/^(pkg)$/}
+      list.delete_if do |entry|
+        next unless test(?e, entry)
+        extension = File.basename(entry).split(%r/[.]/).last
+        ignore_extensions.any?{|ext| ext === extension}
+      end
+      list.delete_if do |entry|
+        next unless test(?d, entry)
+        dirname = File.expand_path(entry)
+        ignore_directories.any?{|dir| File.expand_path(dir) == dirname}
+      end
     end
 
   lib         = This.lib
