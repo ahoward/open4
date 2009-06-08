@@ -11,7 +11,11 @@ end
 
 
 task :gemspec do
-  shiteless = lambda{|list| list.delete_if{|file| file =~ %r/\.(git|svn|tmp|sw.|bak)$/}}
+  shiteless = 
+    lambda do |list|
+      list.delete_if{|entry| test(?f, entry) and File.basename(entry) =~ %r/\.(git|svn|tmp|sw.|bak)$/}
+      list.delete_if{|entry| test(?d, entry) and File.basename(entry) =~ %r/^(pkg)$/}
+    end
 
   lib         = This.lib
   version     = This.version

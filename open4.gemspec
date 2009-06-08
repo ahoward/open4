@@ -7,7 +7,7 @@ Gem::Specification::new do |spec|
   spec.platform = Gem::Platform::RUBY
   spec.summary = "open4"
 
-  spec.files = ["lib", "lib/open4.rb", "open4.gemspec", "pkg", "rakefile", "README", "README.erb", "samples", "samples/bg.rb", "samples/block.rb", "samples/exception.rb", "samples/simple.rb", "samples/spawn.rb", "samples/stdin_timeout.rb", "samples/timeout.rb", "white_box", "white_box/leak.rb"]
+  spec.files = ["lib", "lib/open4.rb", "open4.gemspec", "pkg/open4-1.0.0.gem", "rakefile", "README", "README.erb", "samples", "samples/bg.rb", "samples/block.rb", "samples/exception.rb", "samples/simple.rb", "samples/spawn.rb", "samples/stdin_timeout.rb", "samples/timeout.rb", "white_box", "white_box/leak.rb"]
   spec.executables = []
   
   spec.require_path = "lib"
