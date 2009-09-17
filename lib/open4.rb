@@ -17,6 +17,7 @@ module Open4
     verbose = $VERBOSE
     begin
       $VERBOSE = nil
+      ps.first.fcntl(Fcntl::F_SETFD, Fcntl::FD_CLOEXEC)
       ps.last.fcntl(Fcntl::F_SETFD, Fcntl::FD_CLOEXEC)
 
       cid = fork {
