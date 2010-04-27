@@ -200,8 +200,10 @@ module Open4
     send_dst =
       if dst.respond_to?(:call)
         lambda{|buf| dst.call(buf)}
+      elsif dst.respond_to?(:<<)
+        lambda{|buf| dst << buf }
       else
-        lambda{|buf| dst << buf}
+        lambda{|buf| buf }
       end
 
     unless src.nil?
