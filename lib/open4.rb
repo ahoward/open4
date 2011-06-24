@@ -5,7 +5,7 @@ require 'thread'
 
 module Open4
 #--{{{
-  VERSION = '1.1.0'
+  VERSION = '1.0.1'
   def self.version() VERSION end
 
   class Error < ::StandardError; end
@@ -182,10 +182,10 @@ module Open4
 #--{{{
     lambda do |*args|
       keys, default, ignored = args
-      catch('opt') do
+      catch(:opt) do
         [keys].flatten.each do |key|
           [key, key.to_s, key.to_s.intern].each do |key|
-            throw 'opt', opts[key] if opts.has_key?(key)
+            throw :opt, opts[key] if opts.has_key?(key)
           end
         end
         default
