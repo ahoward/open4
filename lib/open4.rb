@@ -4,14 +4,12 @@ require 'timeout'
 require 'thread'
 
 module Open4
-#--{{{
   VERSION = '1.0.1'
   def self.version() VERSION end
 
   class Error < ::StandardError; end
 
   def popen4(*cmd, &b)
-#--{{{
     pw, pr, pe, ps = IO.pipe, IO.pipe, IO.pipe, IO.pipe
 
     verbose = $VERBOSE
@@ -74,14 +72,12 @@ module Open4
     else
       [cid, pw.last, pr.first, pe.first]
     end
-#--}}}
   end
   alias open4 popen4
   module_function :popen4
   module_function :open4
 
   class SpawnError < Error
-#--{{{
     attr 'cmd'
     attr 'status'
     attr 'signals'
@@ -98,11 +94,9 @@ module Open4
       sigs = @signals.map{|k,v| "#{ k }:#{ v.inspect }"}.join(' ')
       super "cmd <#{ cmd }> failed with status <#{ exitstatus.inspect }> signals <#{ sigs }>"
     end
-#--}}}
   end
 
   class ThreadEnsemble
-#--{{{
     attr 'threads'
 
     def initialize cid
@@ -154,18 +148,14 @@ module Open4
     def all_done
       @threads.size.times{ @done.pop }
     end
-#--}}}
   end
 
   def to timeout = nil
-#--{{{
     Timeout.timeout(timeout){ yield }
-#--}}}
   end
   module_function :to
 
   def new_thread *a, &b
-#--{{{
     cur = Thread.current
     Thread.new(*a) do |*a|
       begin
@@ -174,12 +164,10 @@ module Open4
         cur.raise e
       end
     end
-#--}}}
   end
   module_function :new_thread
 
   def getopts opts = {}
-#--{{{
     lambda do |*args|
       keys, default, ignored = args
       catch(:opt) do
@@ -191,12 +179,10 @@ module Open4
         default
       end
     end
-#--}}}
   end
   module_function :getopts
 
   def relay src, dst = nil, t = nil
-#--{{{
     send_dst =
       if dst.respond_to?(:call)
         lambda{|buf| dst.call(buf)}
@@ -244,12 +230,10 @@ module Open4
         send_dst[buf]
       end
     end
-#--}}}
   end
   module_function :relay
 
   def spawn arg, *argv 
-#--{{{
     argv.unshift(arg)
     opts = ((argv.size > 1 and Hash === argv.last) ? argv.pop : {})
     argv.flatten!
@@ -325,7 +309,6 @@ module Open4
       (ignore_exit_failure or (status.nil? and ignore_exec_failure) or exitstatus.include?(status.exitstatus))
 
     status
-#--}}}
   end
   module_function :spawn
 
@@ -336,7 +319,6 @@ module Open4
   module_function :chdir
 
   def background arg, *argv 
-#--{{{
     require 'thread'
     q = Queue.new
     opts = { 'pid' => q, :pid => q }
@@ -354,14 +336,12 @@ module Open4
       define_method(:exitstatus){ @exitstatus ||= spawn_status.exitstatus }
     }
     thread
-#--}}}
   end
   alias bg background
   module_function :background
   module_function :bg
 
   def maim pid, opts = {}
-#--{{{
     getopt = getopts opts
     sigs = getopt[ 'signals', %w(SIGTERM SIGQUIT SIGKILL) ]
     suspend = getopt[ 'suspend', 4 ]
@@ -379,12 +359,10 @@ module Open4
       return true unless alive? pid
     end
     return(not alive?(pid)) 
-#--}}}
   end
   module_function :maim
 
   def alive pid
-#--{{{
     pid = Integer pid
     begin
       Process.kill 0, pid
@@ -392,12 +370,10 @@ module Open4
     rescue Errno::ESRCH
       false
     end
-#--}}}
   end
   alias alive? alive
   module_function :alive
   module_function :'alive?'
-#--}}}
 end
 
 def open4(*cmd, &b) cmd.size == 0 ? Open4 : Open4::popen4(*cmd, &b) end
