@@ -77,7 +77,7 @@ module Open4
 
     [ pw.first, pr.last, pe.last, ps.last ].each { |fd| fd.close }
 
-    Open4.propagate_exception ps.first if exception_propagation_at == :init
+    Open4.propagate_exception cid, ps.first if exception_propagation_at == :init
 
     pw.last.sync = true
 
@@ -92,7 +92,7 @@ module Open4
         pi.each { |fd| fd.close unless fd.closed? }
       end
 
-      Open4.propagate_exception ps.first if exception_propagation_at == :block
+      Open4.propagate_exception cid, ps.first if exception_propagation_at == :block
 
       Process.waitpid2(cid).last
     ensure
@@ -100,11 +100,15 @@ module Open4
     end
   end
 
-  def self.propagate_exception(ps_read)
+  def self.propagate_exception(cid, ps_read)
     e = Marshal.load ps_read
     raise Exception === e ? e : "unknown failure!"
   rescue EOFError
     # Child process did not raise exception.
+  rescue
+    # Child process raised exception; wait it in order to avoid a zombie.
+    Process.waitpid2 cid
+    raise
   ensure
     ps_read.close
   end

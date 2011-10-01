@@ -34,6 +34,12 @@ class PFork4Test < TestCase
     assert_raises(MyError) { pfork4(fun) {} }
   end
 
+  def test_fun_propagate_exception_with_block_avoids_zombie_child_process
+    fun = lambda { raise MyError }
+    assert_raises(MyError) { pfork4(fun) {} }
+    assert_empty Process.waitall
+  end
+
   def test_call_block_upon_exception
     fun = lambda { raise MyError }
     block_called = false

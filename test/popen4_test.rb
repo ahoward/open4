@@ -3,10 +3,17 @@ require 'test_case'
 module Open4
 
 class POpen4Test < TestCase
+  UNKNOWN_CMD = 'asdfadsfjlkkk'
+  UNKNOWN_CMD_ERRORS = [Errno::ENOENT, Errno::EINVAL]
+
   def test_unknown_command_propagates_exception
-    unknown_cmd = 'asdfadsfjlkkk'
-    err = assert_raises(Errno::ENOENT, Errno::EINVAL) { popen4 unknown_cmd }
-    assert_match /#{unknown_cmd}/, err.to_s if on_mri?
+    err = assert_raises(*UNKNOWN_CMD_ERRORS) { popen4 UNKNOWN_CMD }
+    assert_match /#{UNKNOWN_CMD}/, err.to_s if on_mri?
+  end
+
+  def test_exception_propagation_avoids_zombie_child_process
+    assert_raises(*UNKNOWN_CMD_ERRORS) { popen4 UNKNOWN_CMD }
+    assert_empty Process.waitall
   end
 
   def test_exit_failure
