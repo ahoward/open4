@@ -9,14 +9,41 @@ module Open4
 
   class Error < ::StandardError; end
 
+  def pfork4(fun, &b)
+    Open4.do_popen(b, :block) do |ps_read, _|
+      ps_read.close
+      begin
+        fun.call
+      rescue SystemExit => e
+        # Make it seem to the caller that calling Kernel#exit in +fun+ kills
+        # the child process normally. Kernel#exit! bypasses this rescue
+        # block.
+        exit! e.status
+      else
+        exit! 0
+      end
+    end
+  end
+  module_function :pfork4
+
   def popen4(*cmd, &b)
+    Open4.do_popen(b, :init) do |ps_read, ps_write|
+      ps_read.fcntl(Fcntl::F_SETFD, Fcntl::FD_CLOEXEC)
+      ps_write.fcntl(Fcntl::F_SETFD, Fcntl::FD_CLOEXEC)
+      exec(*cmd)
+      raise 'forty-two'   # Is this really needed?
+    end
+  end
+  alias open4 popen4
+  module_function :popen4
+  module_function :open4
+
+  def self.do_popen(b = nil, exception_propagation_at = nil, &cmd)
     pw, pr, pe, ps = IO.pipe, IO.pipe, IO.pipe, IO.pipe
 
     verbose = $VERBOSE
     begin
       $VERBOSE = nil
-      ps.first.fcntl(Fcntl::F_SETFD, Fcntl::FD_CLOEXEC)
-      ps.last.fcntl(Fcntl::F_SETFD, Fcntl::FD_CLOEXEC)
 
       cid = fork {
         pw.last.close
@@ -34,48 +61,57 @@ module Open4
         STDOUT.sync = STDERR.sync = true
 
         begin
-          exec(*cmd)
-          raise 'forty-two' 
+          cmd.call(ps)
         rescue Exception => e
           Marshal.dump(e, ps.last)
           ps.last.flush
+        ensure
+          ps.last.close unless ps.last.closed?
         end
-        ps.last.close unless (ps.last.closed?)
+
         exit!
       }
     ensure
       $VERBOSE = verbose
     end
 
-    [pw.first, pr.last, pe.last, ps.last].each{|fd| fd.close}
+    [ pw.first, pr.last, pe.last, ps.last ].each { |fd| fd.close }
 
-    begin
-      e = Marshal.load ps.first
-      raise(Exception === e ? e : "unknown failure!")
-    rescue EOFError # If we get an EOF error, then the exec was successful
-      42
-    ensure
-      ps.first.close
-    end
+    Open4.propagate_exception cid, ps.first if exception_propagation_at == :init
 
     pw.last.sync = true
 
-    pi = [pw.last, pr.first, pe.first]
+    pi = [ pw.last, pr.first, pe.first ]
 
-    if b 
+    begin
+      return [cid, *pi] unless b
+
       begin
-        b[cid, *pi]
-        Process.waitpid2(cid).last
+        b.call(cid, *pi)
       ensure
-        pi.each{|fd| fd.close unless fd.closed?}
+        pi.each { |fd| fd.close unless fd.closed? }
       end
-    else
-      [cid, pw.last, pr.first, pe.first]
+
+      Open4.propagate_exception cid, ps.first if exception_propagation_at == :block
+
+      Process.waitpid2(cid).last
+    ensure
+      ps.first.close unless ps.first.closed?
     end
   end
-  alias open4 popen4
-  module_function :popen4
-  module_function :open4
+
+  def self.propagate_exception(cid, ps_read)
+    e = Marshal.load ps_read
+    raise Exception === e ? e : "unknown failure!"
+  rescue EOFError
+    # Child process did not raise exception.
+  rescue
+    # Child process raised exception; wait it in order to avoid a zombie.
+    Process.waitpid2 cid
+    raise
+  ensure
+    ps_read.close
+  end
 
   class SpawnError < Error
     attr 'cmd'
