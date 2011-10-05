@@ -9,19 +9,8 @@ task :default do
 end
 
 task :test do
-  run_tests!
-end
-
-namespace :test do
-  task(:unit){ run_tests!(:unit) }
-  task(:functional){ run_tests!(:functional) }
-  task(:integration){ run_tests!(:integration) }
-end
-
-def run_tests!(which = nil)
-  which ||= '**'
   test_dir = File.join(This.dir, "test")
-  test_glob ||= File.join(test_dir, "#{ which }/**_test.rb")
+  test_glob ||= File.join(test_dir, "/**_test.rb")
   test_rbs = Dir.glob(test_glob).sort
         
   div = ('=' * 119)
@@ -29,7 +18,7 @@ def run_tests!(which = nil)
 
   test_rbs.each_with_index do |test_rb, index|
     testno = index + 1
-    command = "#{ This.ruby } -I ./lib -I ./test/lib #{ test_rb }"
+    command = "#{ This.ruby } -rubygems -I ./lib -I ./test/support #{ test_rb }"
 
     puts
     say(div, :color => :cyan, :bold => true)

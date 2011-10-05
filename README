@@ -193,6 +193,44 @@ SAMPLES
     42
     /dmsp/reference/ruby-1.8.1//lib/ruby/1.8/timeout.rb:42:in `relay': execution expired (Timeout::Error)
 
+  ----------------------------------------------------------------------------
+  pfork4 is similar to popen4, but instead of executing a command, it runs
+  ruby code in a child process. if the child process raises an exception, it
+  propagates to the parent.
+  ----------------------------------------------------------------------------
+
+    harp: > cat sample/pfork4.rb
+    require 'open4'
+
+    echo = lambda do
+      $stdout.write $stdin.read
+      raise 'finish implementing me'
+    end
+
+    org_message = "hello, world!"
+    got_message = nil
+    exception   = nil
+
+    begin
+      Open4.pfork4(echo) do |cid, stdin, stdout, stderr|
+        stdin.write org_message
+        stdin.close
+        got_message = stdout.read
+      end
+    rescue RuntimeError => e
+      exception = e.to_s
+    end
+
+    puts "org_message: #{org_message}"
+    puts "got_message: #{got_message}"
+    puts "exception  : #{exception}"
+
+
+    harp: > ruby sample/pfork4.rb
+    org_message: hello, world!
+    got_message: hello, world!
+    exception  : finish implementing me
+
 HISTORY
   1.0.0
     - added ability for spawn to take a proc (respond_to?(:call))
