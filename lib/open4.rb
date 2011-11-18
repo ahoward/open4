@@ -38,7 +38,7 @@ module Open4
   module_function :popen4
   module_function :open4
 
-  def self.do_popen(b = nil, exception_propagation_at = nil, &cmd)
+  def self.do_popen(b = nil, exception_propagation_at = nil, closefds=false, &cmd)
     pw, pr, pe, ps = IO.pipe, IO.pipe, IO.pipe, IO.pipe
 
     verbose = $VERBOSE
@@ -46,6 +46,13 @@ module Open4
       $VERBOSE = nil
 
       cid = fork {
+        if closefds
+          exlist = [pw,pr,pe,ps].map{|p| [p.first.fileno, p.last.fileno] }.flatten
+          ObjectSpace.each_object(IO){|io|
+            io.close if (not io.closed?) and (not exlist.include? io.fileno)
+          }
+        end
+
         pw.last.close
         STDIN.reopen pw.first
         pw.first.close
