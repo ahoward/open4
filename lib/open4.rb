@@ -4,7 +4,7 @@ require 'timeout'
 require 'thread'
 
 module Open4
-  VERSION = '1.1.0'
+  VERSION = '1.2.1'
   def self.version() VERSION end
 
   class Error < ::StandardError; end
@@ -38,6 +38,16 @@ module Open4
   module_function :popen4
   module_function :open4
 
+  def popen4ext(closefds=false, *cmd, &b)
+    Open4.do_popen(b, :init, closefds) do |ps_read, ps_write|
+      ps_read.fcntl(Fcntl::F_SETFD, Fcntl::FD_CLOEXEC)
+      ps_write.fcntl(Fcntl::F_SETFD, Fcntl::FD_CLOEXEC)
+      exec(*cmd)
+      raise 'forty-two'   # Is this really needed?
+    end
+  end
+  module_function :popen4ext
+
   def self.do_popen(b = nil, exception_propagation_at = nil, closefds=false, &cmd)
     pw, pr, pe, ps = IO.pipe, IO.pipe, IO.pipe, IO.pipe
 
@@ -47,7 +57,7 @@ module Open4
 
       cid = fork {
         if closefds
-          exlist = [pw,pr,pe,ps].map{|p| [p.first.fileno, p.last.fileno] }.flatten
+          exlist = [0, 1, 2] | [pw,pr,pe,ps].map{|p| [p.first.fileno, p.last.fileno] }.flatten
           ObjectSpace.each_object(IO){|io|
             io.close if (not io.closed?) and (not exlist.include? io.fileno)
           }

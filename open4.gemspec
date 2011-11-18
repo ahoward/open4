@@ -3,7 +3,7 @@
 
 Gem::Specification::new do |spec|
   spec.name = "open4"
-  spec.version = "1.1.0"
+  spec.version = "1.2.1"
   spec.platform = Gem::Platform::RUBY
   spec.summary = "open4"
   spec.description = "description: open4 kicks the ass"
@@ -30,6 +30,7 @@ Gem::Specification::new do |spec|
  "test",
  "test/pfork4_test.rb",
  "test/popen4_test.rb",
+ "test/popen4ext_test.rb",
  "test/support",
  "test/support/test_case.rb",
  "white_box",
