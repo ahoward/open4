@@ -4,7 +4,7 @@ require 'timeout'
 require 'thread'
 
 module Open4
-  VERSION = '1.2.1'
+  VERSION = '1.3.0'
   def self.version() VERSION end
 
   class Error < ::StandardError; end

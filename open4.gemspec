@@ -3,7 +3,7 @@
 
 Gem::Specification::new do |spec|
   spec.name = "open4"
-  spec.version = "1.2.1"
+  spec.version = "1.3.0"
   spec.platform = Gem::Platform::RUBY
   spec.summary = "open4"
   spec.description = "description: open4 kicks the ass"
@@ -12,7 +12,6 @@ Gem::Specification::new do |spec|
 ["LICENSE",
  "README",
  "README.erb",
- "Rakefile",
  "lib",
  "lib/open4.rb",
  "open4.gemspec",
