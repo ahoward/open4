@@ -1,4 +1,5 @@
 require 'test_case'
+require 'socket'
 
 module Open4
 
@@ -76,6 +77,12 @@ ruby -e "
     assert_equal via_msg, out_actual
     assert_equal err_msg, err_actual
     assert_equal 0, status.exitstatus
+  end
+
+  def test_close_ignores_errors
+    TCPSocket.new('localhost', 59367).close rescue nil
+    cid, _ = popen4ext true, %{ruby -e "exit"}
+    assert_equal 0, wait_status(cid)
   end
 end
 
