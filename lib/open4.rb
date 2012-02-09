@@ -308,6 +308,7 @@ module Open4
     stderr_timeout = getopt[ %w( stderr_timeout ) ]
     status = getopt[ %w( status ) ]
     cwd = getopt[ %w( cwd dir ) ]
+    closefds = getopt[ %w( close_fds ) ]
 
     exitstatus =
       case exitstatus
@@ -328,7 +329,7 @@ module Open4
       begin
         chdir(cwd) do
           Timeout::timeout(timeout) do
-            popen4(*argv) do |c, i, o, e|
+            popen4ext(closefds, *argv) do |c, i, o, e|
               started = true
 
               %w( replace pid= << push update ).each do |msg|
