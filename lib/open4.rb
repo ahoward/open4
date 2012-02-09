@@ -59,7 +59,7 @@ module Open4
         if closefds
           exlist = [0, 1, 2] | [pw,pr,pe,ps].map{|p| [p.first.fileno, p.last.fileno] }.flatten
           ObjectSpace.each_object(IO){|io|
-            io.close if (not io.closed?) and (not exlist.include? io.fileno)
+            io.close if (not io.closed?) and (not exlist.include? io.fileno) rescue nil
           }
         end
 
