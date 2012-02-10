@@ -59,7 +59,7 @@ module Open4
         if closefds
           exlist = [0, 1, 2] | [pw,pr,pe,ps].map{|p| [p.first.fileno, p.last.fileno] }.flatten
           ObjectSpace.each_object(IO){|io|
-            io.close if (not io.closed?) and (not exlist.include? io.fileno)
+            io.close if (not io.closed?) and (not exlist.include? io.fileno) rescue nil
           }
         end
 
@@ -308,6 +308,7 @@ module Open4
     stderr_timeout = getopt[ %w( stderr_timeout ) ]
     status = getopt[ %w( status ) ]
     cwd = getopt[ %w( cwd dir ) ]
+    closefds = getopt[ %w( close_fds ) ]
 
     exitstatus =
       case exitstatus
@@ -328,7 +329,7 @@ module Open4
       begin
         chdir(cwd) do
           Timeout::timeout(timeout) do
-            popen4(*argv) do |c, i, o, e|
+            popen4ext(closefds, *argv) do |c, i, o, e|
               started = true
 
               %w( replace pid= << push update ).each do |msg|
