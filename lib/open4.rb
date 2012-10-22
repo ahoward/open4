@@ -338,17 +338,17 @@ module Open4
 
               te = ThreadEnsemble.new c
 
-              te.add_thread(i, stdin) do |i, stdin|
-                relay stdin, i, stdin_timeout
-                i.close rescue nil
+              te.add_thread(i, stdin) do |inc, std_in|
+                relay std_in, inc, stdin_timeout
+                inc.close rescue nil
               end
 
-              te.add_thread(o, stdout) do |o, stdout|
-                relay o, stdout, stdout_timeout
+              te.add_thread(o, stdout) do |out, std_out|
+                relay out, std_out, stdout_timeout
               end
 
-              te.add_thread(e, stderr) do |o, stderr|
-                relay e, stderr, stderr_timeout
+              te.add_thread(e, stderr) do |out, std_err|
+                relay e, std_err, stderr_timeout
               end
 
               te.run
