@@ -382,7 +382,7 @@ module Open4
       else
         argv.push opts
     end
-    thread = Thread.new(arg, argv){|arg, argv| spawn arg, *argv}
+    thread = Thread.new(arg, argv){|p1, p2| spawn p1, *p2}
     sc = class << thread; self; end
     sc.module_eval {
       define_method(:pid){ @pid ||= q.pop }
