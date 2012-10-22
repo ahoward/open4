@@ -179,9 +179,9 @@ module Open4
 
       begin
         @argv.each do |a, b|
-          @threads << Thread.new(*a) do |*a|
+          @threads << Thread.new(*a) do |*args|
             begin
-              b[*a]
+              b[*args]
             ensure
               killall rescue nil if $!
               @done.push Thread.current
