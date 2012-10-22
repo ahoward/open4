@@ -228,8 +228,8 @@ module Open4
       keys, default, _ = args
       catch(:opt) do
         [keys].flatten.each do |key|
-          [key, key.to_s, key.to_s.intern].each do |key|
-            throw :opt, opts[key] if opts.has_key?(key)
+          [key, key.to_s, key.to_s.intern].each do |k|
+            throw :opt, opts[k] if opts.has_key?(k)
           end
         end
         default
