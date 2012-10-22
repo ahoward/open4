@@ -139,7 +139,7 @@ module Open4
     end
     def initialize cmd, status
       @cmd, @status = cmd, status
-      @signals = {} 
+      @signals = {}
       if status.signaled?
         @signals['termsig'] = status.termsig
         @signals['stopsig'] = status.stopsig
@@ -286,7 +286,7 @@ module Open4
   end
   module_function :relay
 
-  def spawn arg, *argv 
+  def spawn arg, *argv
     argv.unshift(arg)
     opts = ((argv.size > 1 and Hash === argv.last) ? argv.pop : {})
     argv.flatten!
@@ -333,7 +333,7 @@ module Open4
               started = true
 
               %w( replace pid= << push update ).each do |msg|
-                break(pid.send(msg, c)) if pid.respond_to? msg 
+                break(pid.send(msg, c)) if pid.respond_to? msg
               end
 
               te = ThreadEnsemble.new c
@@ -372,7 +372,7 @@ module Open4
   end
   module_function :chdir
 
-  def background arg, *argv 
+  def background arg, *argv
     require 'thread'
     q = Queue.new
     opts = { 'pid' => q, :pid => q }
@@ -404,7 +404,7 @@ module Open4
     sigs.each do |sig|
       begin
         Process.kill sig, pid
-        existed = true 
+        existed = true
       rescue Errno::ESRCH
         return(existed ? nil : true)
       end
@@ -412,7 +412,7 @@ module Open4
       sleep suspend
       return true unless alive? pid
     end
-    return(not alive?(pid)) 
+    return(not alive?(pid))
   end
   module_function :maim
 
