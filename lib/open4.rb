@@ -210,9 +210,9 @@ module Open4
 
   def new_thread *a, &b
     cur = Thread.current
-    Thread.new(*a) do |*a|
+    Thread.new(*a) do |*args|
       begin
-        b[*a]
+        b[*args]
       rescue Exception => e
         cur.raise e
       end
