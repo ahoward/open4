@@ -255,19 +255,19 @@ module Open4
         q = Queue.new
         th = nil
 
-        timer_set = lambda do |t|
-          th = new_thread{ to(t){ q.pop } }
+        timer_set = lambda do |thd|
+          th = new_thread{ to(thd){ q.pop } }
         end
 
-        timer_cancel = lambda do |t|
+        timer_cancel = lambda do |thd|
           th.kill if th rescue nil
         end
 
         timer_set[t]
         begin
-          src.each do |buf|
+          src.each do |buff|
             timer_cancel[t]
-            send_dst[buf]
+            send_dst[buff]
             timer_set[t]
           end
         ensure
