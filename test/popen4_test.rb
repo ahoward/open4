@@ -8,7 +8,7 @@ class POpen4Test < TestCase
 
   def test_unknown_command_propagates_exception
     err = assert_raises(*UNKNOWN_CMD_ERRORS) { popen4 UNKNOWN_CMD }
-    assert_match /#{UNKNOWN_CMD}/, err.to_s if on_mri?
+    assert_match(/#{UNKNOWN_CMD}/, err.to_s) if on_mri?
   end
 
   def test_exception_propagation_avoids_zombie_child_process
@@ -31,7 +31,7 @@ class POpen4Test < TestCase
     cmd = %{ruby -e "STDOUT.print Process.pid"}
     cid_in_block = nil
     cid_in_fun = nil
-    status = popen4(cmd) do |cid, _, stdout, _|
+    popen4(cmd) do |cid, _, stdout, _|
       cid_in_block = cid
       cid_in_fun = stdout.read.to_i
     end

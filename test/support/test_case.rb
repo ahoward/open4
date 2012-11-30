@@ -13,7 +13,7 @@ module Open4
     class MyError < RuntimeError; end
 
     def on_mri?
-      ::Config::CONFIG['ruby_install_name'] == 'ruby'
+      ::RbConfig::CONFIG['ruby_install_name'] == 'ruby'
     end
 
     def wait_status(cid)

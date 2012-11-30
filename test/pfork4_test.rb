@@ -51,7 +51,7 @@ class PFork4Test < TestCase
     fun = lambda { $stdout.write Process.pid }
     cid_in_block = nil
     cid_in_fun = nil
-    status = pfork4(fun) do |cid, _, stdout, _|
+    pfork4(fun) do |cid, _, stdout, _|
       cid_in_block = cid
       cid_in_fun = stdout.read.to_i
     end
