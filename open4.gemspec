@@ -6,7 +6,7 @@ Gem::Specification::new do |spec|
   spec.version = "1.3.0"
   spec.platform = Gem::Platform::RUBY
   spec.summary = "open4"
-  spec.description = "description: open4 kicks the ass"
+  spec.description = "open child process with handles on pid, stdin, stdout, and stderr: manage child processes and their io handles easily."
 
   spec.files =
 ["LICENSE",
