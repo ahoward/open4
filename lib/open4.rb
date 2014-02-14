@@ -222,7 +222,7 @@ module Open4
 
   def getopts opts = {}
     lambda do |*args|
-      keys, default, ignored = args
+      keys, default, _ = args
       catch(:opt) do
         [keys].flatten.each do |key|
           [key, key.to_s, key.to_s.intern].each do |key|
