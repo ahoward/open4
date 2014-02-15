@@ -4,8 +4,12 @@ require 'timeout'
 require 'thread'
 
 module Open4
-  VERSION = '1.3.0'
-  def self.version() VERSION end
+  VERSION = '1.3.1'
+  def Open4.version() VERSION end
+
+  def Open4.description
+    'open child process with handles on pid, stdin, stdout, and stderr: manage child processes and their io handles easily.'
+  end
 
   class Error < ::StandardError; end
 
