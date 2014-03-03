@@ -3,11 +3,11 @@
 
 Gem::Specification::new do |spec|
   spec.name = "open4"
-  spec.version = "1.3.2"
+  spec.version = "1.3.3"
   spec.platform = Gem::Platform::RUBY
   spec.summary = "open4"
   spec.description = "open child process with handles on pid, stdin, stdout, and stderr: manage child processes and their io handles easily."
-  spec.license = "same as ruby's"
+  spec.license = "Ruby"
 
   spec.files =
 ["LICENSE",

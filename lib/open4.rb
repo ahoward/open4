@@ -4,7 +4,7 @@ require 'timeout'
 require 'thread'
 
 module Open4
-  VERSION = '1.3.2'
+  VERSION = '1.3.3'
   def Open4.version() VERSION end
 
   def Open4.description
