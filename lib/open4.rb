@@ -143,7 +143,7 @@ module Open4
     end
     def initialize cmd, status
       @cmd, @status = cmd, status
-      @signals = {} 
+      @signals = {}
       if status.signaled?
         @signals['termsig'] = status.termsig
         @signals['stopsig'] = status.stopsig
@@ -183,9 +183,9 @@ module Open4
 
       begin
         @argv.each do |a, b|
-          @threads << Thread.new(*a) do |*a|
+          @threads << Thread.new(*a) do |*args|
             begin
-              b[*a]
+              b[*args]
             ensure
               killall rescue nil if $!
               @done.push Thread.current
@@ -214,9 +214,9 @@ module Open4
 
   def new_thread *a, &b
     cur = Thread.current
-    Thread.new(*a) do |*a|
+    Thread.new(*a) do |*args|
       begin
-        b[*a]
+        b[*args]
       rescue Exception => e
         cur.raise e
       end
@@ -224,13 +224,16 @@ module Open4
   end
   module_function :new_thread
 
+  def random_dummy_function(*args)
+  end
+
   def getopts opts = {}
     lambda do |*args|
       keys, default, _ = args
       catch(:opt) do
         [keys].flatten.each do |key|
-          [key, key.to_s, key.to_s.intern].each do |key|
-            throw :opt, opts[key] if opts.has_key?(key)
+          [key, key.to_s, key.to_s.intern].each do |k|
+            throw :opt, opts[k] if opts.has_key?(k)
           end
         end
         default
@@ -259,19 +262,19 @@ module Open4
         q = Queue.new
         th = nil
 
-        timer_set = lambda do |t|
-          th = new_thread{ to(t){ q.pop } }
+        timer_set = lambda do |thd|
+          th = new_thread{ to(thd){ q.pop } }
         end
 
-        timer_cancel = lambda do |t|
+        timer_cancel = lambda do |thd|
           th.kill if th rescue nil
         end
 
         timer_set[t]
         begin
-          src.each do |buf|
+          src.each do |buff|
             timer_cancel[t]
-            send_dst[buf]
+            send_dst[buff]
             timer_set[t]
           end
         ensure
@@ -290,7 +293,7 @@ module Open4
   end
   module_function :relay
 
-  def spawn arg, *argv 
+  def spawn arg, *argv
     argv.unshift(arg)
     opts = ((argv.size > 1 and Hash === argv.last) ? argv.pop : {})
     argv.flatten!
@@ -337,22 +340,22 @@ module Open4
               started = true
 
               %w( replace pid= << push update ).each do |msg|
-                break(pid.send(msg, c)) if pid.respond_to? msg 
+                break(pid.send(msg, c)) if pid.respond_to? msg
               end
 
               te = ThreadEnsemble.new c
 
-              te.add_thread(i, stdin) do |i, stdin|
-                relay stdin, i, stdin_timeout
-                i.close rescue nil
+              te.add_thread(i, stdin) do |inc, std_in|
+                relay std_in, inc, stdin_timeout
+                inc.close rescue nil
               end
 
-              te.add_thread(o, stdout) do |o, stdout|
-                relay o, stdout, stdout_timeout
+              te.add_thread(o, stdout) do |out, std_out|
+                relay out, std_out, stdout_timeout
               end
 
-              te.add_thread(e, stderr) do |o, stderr|
-                relay e, stderr, stderr_timeout
+              te.add_thread(e, stderr) do |out, std_err|
+                relay e, std_err, stderr_timeout
               end
 
               te.run
@@ -376,7 +379,7 @@ module Open4
   end
   module_function :chdir
 
-  def background arg, *argv 
+  def background arg, *argv
     require 'thread'
     q = Queue.new
     opts = { 'pid' => q, :pid => q }
@@ -386,7 +389,7 @@ module Open4
       else
         argv.push opts
     end
-    thread = Thread.new(arg, argv){|arg, argv| spawn arg, *argv}
+    thread = Thread.new(arg, argv){|p1, p2| spawn p1, *p2}
     sc = class << thread; self; end
     sc.module_eval {
       define_method(:pid){ @pid ||= q.pop }
@@ -408,7 +411,7 @@ module Open4
     sigs.each do |sig|
       begin
         Process.kill sig, pid
-        existed = true 
+        existed = true
       rescue Errno::ESRCH
         return(existed ? nil : true)
       end
@@ -416,7 +419,7 @@ module Open4
       sleep suspend
       return true unless alive? pid
     end
-    return(not alive?(pid)) 
+    return(not alive?(pid))
   end
   module_function :maim
 
