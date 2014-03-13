@@ -3,7 +3,7 @@
 
 Gem::Specification::new do |spec|
   spec.name = "open4"
-  spec.version = "1.3.3"
+  spec.version = "1.3.4"
   spec.platform = Gem::Platform::RUBY
   spec.summary = "open4"
   spec.description = "open child process with handles on pid, stdin, stdout, and stderr: manage child processes and their io handles easily."
@@ -13,10 +13,10 @@ Gem::Specification::new do |spec|
 ["LICENSE",
  "README",
  "README.erb",
+ "Rakefile",
  "lib",
  "lib/open4.rb",
  "open4.gemspec",
- "rakefile",
  "samples",
  "samples/bg.rb",
  "samples/block.rb",
@@ -28,11 +28,11 @@ Gem::Specification::new do |spec|
  "samples/stdin_timeout.rb",
  "samples/timeout.rb",
  "test",
+ "test/lib",
+ "test/lib/test_case.rb",
  "test/pfork4_test.rb",
  "test/popen4_test.rb",
  "test/popen4ext_test.rb",
- "test/support",
- "test/support/test_case.rb",
  "white_box",
  "white_box/leak.rb"]
 

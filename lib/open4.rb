@@ -4,7 +4,7 @@ require 'timeout'
 require 'thread'
 
 module Open4
-  VERSION = '1.3.3'
+  VERSION = '1.3.4'
   def Open4.version() VERSION end
 
   def Open4.description
@@ -183,9 +183,9 @@ module Open4
 
       begin
         @argv.each do |a, b|
-          @threads << Thread.new(*a) do |*a|
+          @threads << Thread.new(*a) do |*_a|
             begin
-              b[*a]
+              b[*_a]
             ensure
               killall rescue nil if $!
               @done.push Thread.current
@@ -214,9 +214,9 @@ module Open4
 
   def new_thread *a, &b
     cur = Thread.current
-    Thread.new(*a) do |*a|
+    Thread.new(*a) do |*_a|
       begin
-        b[*a]
+        b[*_a]
       rescue Exception => e
         cur.raise e
       end
@@ -229,8 +229,8 @@ module Open4
       keys, default, _ = args
       catch(:opt) do
         [keys].flatten.each do |key|
-          [key, key.to_s, key.to_s.intern].each do |key|
-            throw :opt, opts[key] if opts.has_key?(key)
+          [key, key.to_s, key.to_s.intern].each do |_key|
+            throw :opt, opts[_key] if opts.has_key?(_key)
           end
         end
         default
@@ -259,19 +259,19 @@ module Open4
         q = Queue.new
         th = nil
 
-        timer_set = lambda do |t|
-          th = new_thread{ to(t){ q.pop } }
+        timer_set = lambda do |_t|
+          th = new_thread{ to(_t){ q.pop } }
         end
 
-        timer_cancel = lambda do |t|
+        timer_cancel = lambda do |_t|
           th.kill if th rescue nil
         end
 
         timer_set[t]
         begin
-          src.each do |buf|
+          src.each do |_buf|
             timer_cancel[t]
-            send_dst[buf]
+            send_dst[_buf]
             timer_set[t]
           end
         ensure
@@ -342,17 +342,17 @@ module Open4
 
               te = ThreadEnsemble.new c
 
-              te.add_thread(i, stdin) do |i, stdin|
-                relay stdin, i, stdin_timeout
-                i.close rescue nil
+              te.add_thread(i, stdin) do |_i, _stdin|
+                relay _stdin, _i, stdin_timeout
+                _i.close rescue nil
               end
 
-              te.add_thread(o, stdout) do |o, stdout|
-                relay o, stdout, stdout_timeout
+              te.add_thread(o, stdout) do |_o, _stdout|
+                relay _o, _stdout, stdout_timeout
               end
 
-              te.add_thread(e, stderr) do |o, stderr|
-                relay e, stderr, stderr_timeout
+              te.add_thread(e, stderr) do |_o, _stderr| # HACK: I think this is a bug
+                relay e, _stderr, stderr_timeout
               end
 
               te.run
@@ -386,7 +386,7 @@ module Open4
       else
         argv.push opts
     end
-    thread = Thread.new(arg, argv){|arg, argv| spawn arg, *argv}
+    thread = Thread.new(arg, argv){|_arg, _argv| spawn _arg, *_argv}
     sc = class << thread; self; end
     sc.module_eval {
       define_method(:pid){ @pid ||= q.pop }
