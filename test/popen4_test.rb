@@ -56,6 +56,30 @@ ruby -e "
     assert_equal err_msg, err_actual
     assert_equal 0, wait_status(cid)
   end
+  
+  def test_io_pipes_encoding
+     via_msg = "I'm so \xF0\x9F\x98\x82"
+     via_msg.force_encoding('ASCII-8BIT')
+     err_msg = "Errors make me \xF0\x9F\x98\xA0"
+     err_msg.force_encoding('ASCII-8BIT')
+  
+     cmd = <<-END
+ ruby -e "
+   STDOUT.write STDIN.read
+   STDERR.write '#{err_msg}'
+ "
+     END
+     cid, stdin, stdout, stderr = popen4 cmd, "ASCII-8BIT"
+     stdin.write via_msg
+     stdin.close
+     out_actual = stdout.read
+     err_actual = stderr.read
+     assert_equal via_msg, out_actual
+     assert_equal err_msg, err_actual
+     assert_equal 0, wait_status(cid)
+	  assert_equal out_actual.encoding, Encoding.find("ASCII-8BIT")
+  end
+	  
 
   def test_io_pipes_with_block
     via_msg = 'foo'
