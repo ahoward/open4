@@ -13,8 +13,8 @@ module Open4
 
   class Error < ::StandardError; end
 
-  def pfork4(fun, &b)
-    Open4.do_popen(b, :block) do |ps_read, _|
+  def pfork4(fun, encoding = nil, &b)
+    Open4.do_popen(b, :block, false, encoding) do |ps_read, _|
       ps_read.close
       begin
         fun.call
@@ -30,8 +30,8 @@ module Open4
   end
   module_function :pfork4
 
-  def popen4(*cmd, &b)
-    Open4.do_popen(b, :init) do |ps_read, ps_write|
+  def popen4(cmd, encoding = nil, &b)
+    Open4.do_popen(b, :init, false, encoding) do |ps_read, ps_write|
       ps_read.fcntl(Fcntl::F_SETFD, Fcntl::FD_CLOEXEC)
       ps_write.fcntl(Fcntl::F_SETFD, Fcntl::FD_CLOEXEC)
       exec(*cmd)
@@ -42,8 +42,8 @@ module Open4
   module_function :popen4
   module_function :open4
 
-  def popen4ext(closefds=false, *cmd, &b)
-    Open4.do_popen(b, :init, closefds) do |ps_read, ps_write|
+  def popen4ext(cmd, closefds = false, encoding = nil, &b)
+    Open4.do_popen(b, :init, closefds, encoding) do |ps_read, ps_write|
       ps_read.fcntl(Fcntl::F_SETFD, Fcntl::FD_CLOEXEC)
       ps_write.fcntl(Fcntl::F_SETFD, Fcntl::FD_CLOEXEC)
       exec(*cmd)
@@ -52,8 +52,8 @@ module Open4
   end
   module_function :popen4ext
 
-  def self.do_popen(b = nil, exception_propagation_at = nil, closefds=false, &cmd)
-    pw, pr, pe, ps = IO.pipe, IO.pipe, IO.pipe, IO.pipe
+  def self.do_popen(b = nil, exception_propagation_at = nil, closefds=false, encoding=nil, &cmd)
+    pw, pr, pe, ps = IO.pipe(encoding), IO.pipe(encoding), IO.pipe(encoding), IO.pipe(encoding)
 
     verbose = $VERBOSE
     begin
@@ -333,7 +333,7 @@ module Open4
       begin
         chdir(cwd) do
           Timeout::timeout(timeout) do
-            popen4ext(closefds, *argv) do |c, i, o, e|
+            popen4ext(*argv, closefds) do |c, i, o, e|
               started = true
 
               %w( replace pid= << push update ).each do |msg|
