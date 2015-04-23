@@ -77,6 +77,15 @@ ruby -e "
     assert_equal err_msg, err_actual
     assert_equal 0, status.exitstatus
   end
+
+  def test_no_hang_when_forked_process_is_detached
+    cmd = ['-e', <<-RB]
+fork { $stderr.puts "err"; Process.daemon(nil, true); loop { } }
+puts "out"
+    RB
+    status = spawn('ruby', cmd)
+    assert_equal 0, status.exitstatus
+  end
 end
 
 end
