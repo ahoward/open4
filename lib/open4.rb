@@ -143,7 +143,7 @@ module Open4
     end
     def initialize cmd, status
       @cmd, @status = cmd, status
-      @signals = {} 
+      @signals = {}
       if status.signaled?
         @signals['termsig'] = status.termsig
         @signals['stopsig'] = status.stopsig
@@ -157,7 +157,7 @@ module Open4
     attr 'threads'
 
     def initialize cid
-      @cid, @threads, @argv, @done, @running = cid, [], [], Queue.new, false
+      @cid, @threads, @argv, @running = cid, [], [], false
       @killed = false
     end
 
@@ -188,7 +188,6 @@ module Open4
               b[*_a]
             ensure
               killall rescue nil if $!
-              @done.push Thread.current
             end
           end
         end
@@ -198,12 +197,11 @@ module Open4
       ensure
         all_done
       end
-
-      @threads.map{|t| t.value}
     end
 
     def all_done
-      @threads.size.times{ @done.pop }
+      @threads.map{|t| t.run if t.alive? }
+      @cid.value
     end
   end
 
