@@ -145,6 +145,23 @@ class PFork4Test < TestCase
     assert_equal '', out_actual
     assert_equal '', err_actual
   end
+
+  def test_io_pipes_and_then_exception_without_block
+    via_msg = 'foo'
+    fun = lambda do
+      $stdout.write $stdin.read
+      raise MyError
+    end
+    out_actual, err_actual = nil, nil
+    cid, stdin, stdout, stderr = pfork4 fun
+    stdin.write via_msg
+    stdin.close
+    out_actual = stdout.read
+    err_actual = stderr.read
+    assert_equal via_msg, out_actual
+    assert_match "MyError", err_actual
+    assert_equal 1, wait_status(cid)
+  end
 end
 
 end
