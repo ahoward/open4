@@ -84,8 +84,12 @@ module Open4
         begin
           cmd.call(ps)
         rescue Exception => e
-          Marshal.dump(e, ps.last)
-          ps.last.flush
+          begin
+            Marshal.dump(e, ps.last)
+            ps.last.flush
+          rescue Errno::EPIPE
+            raise e
+          end
         ensure
           ps.last.close unless ps.last.closed?
         end
