@@ -5,7 +5,7 @@ require 'open4'
 require 'rbconfig'
 
 module Open4
-  class TestCase < MiniTest::Unit::TestCase
+  class TestCase < Minitest::Test
     include Open4
 
     # Custom exception class for tests so we don't shadow possible
